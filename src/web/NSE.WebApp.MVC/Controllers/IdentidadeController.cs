@@ -1,11 +1,27 @@
-﻿using System.Threading.Tasks;
+﻿    using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp;
 using NSE.WebApp.MVC.Models;
+using NSE.WebApp.MVC.Services;
 
 namespace NSE.WebApp.MVC.Controllers
 {
-    public class IdentidadeController : Controller
+    public class IdentidadeController : MainController
     {
+        private readonly IAutenticacaoService _autenticacaoService;
+
+        public IdentidadeController(IAutenticacaoService autenticacaoService)
+        {
+            _autenticacaoService = autenticacaoService;
+        }
+
+
         [HttpGet]
         [Route("nova-conta")]
         public IActionResult Registro()
@@ -19,10 +35,12 @@ namespace NSE.WebApp.MVC.Controllers
         {
             if (!ModelState.IsValid) return View(usuarioRegistro);
 
-            //Api - Registro
-            if (false) return View(usuarioRegistro);
+            var response = await _autenticacaoService.Registro(usuarioRegistro);
 
-            //Realiza Login App
+            if (ResponsePossuiErros(response.ResponseResult)) return View(usuarioRegistro);
+
+            await RealizarLogin(response);
+            
             return RedirectToAction("Index", "Home");
         }
 
@@ -39,10 +57,11 @@ namespace NSE.WebApp.MVC.Controllers
         {
             if (!ModelState.IsValid) return View(usuarioLogin);
 
-            //Api - Login
-            if (false) return View(usuarioLogin);
+            var response = await _autenticacaoService.Login(usuarioLogin);
 
-            //Realiza Login App
+            if (ResponsePossuiErros(response.ResponseResult)) return View(usuarioLogin);
+
+            await RealizarLogin(response);
             return RedirectToAction("Index", "Home");
         }
 
@@ -51,8 +70,35 @@ namespace NSE.WebApp.MVC.Controllers
         [Route("sair")]
         public async Task<IActionResult> Logout()
         {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
 
         }
+
+        private async Task RealizarLogin(UsuarioRespostaLogin reposta)
+        {
+            var token = ObterTokenFormatado(reposta.AccessToken);
+
+            var claims = new List<Claim>();
+            claims.Add(new Claim("JWT",reposta.AccessToken));
+            claims.AddRange(token.Claims);
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var authProperties = new AuthenticationProperties
+            {
+                ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(60),
+                IsPersistent = true
+            };
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                authProperties);
+        }
+        private static JwtSecurityToken ObterTokenFormatado(string jwtToken)
+        {
+            return  new JwtSecurityTokenHandler().ReadJwtToken(jwtToken) as JwtSecurityToken;
+        }
+
     }
 }
