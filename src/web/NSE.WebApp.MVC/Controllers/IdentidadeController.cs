@@ -1,4 +1,4 @@
-﻿    using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -40,21 +40,24 @@ namespace NSE.WebApp.MVC.Controllers
             if (ResponsePossuiErros(response.ResponseResult)) return View(usuarioRegistro);
 
             await RealizarLogin(response);
-            
+
             return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
         [Route("login")]
-        public IActionResult Login()
+        public IActionResult Login(string returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
 
         [HttpPost]
         [Route("login")]
-        public async Task<IActionResult> Login(UsuarioLogin usuarioLogin)
+        public async Task<IActionResult> Login(UsuarioLogin usuarioLogin, string returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
+
             if (!ModelState.IsValid) return View(usuarioLogin);
 
             var response = await _autenticacaoService.Login(usuarioLogin);
@@ -62,7 +65,10 @@ namespace NSE.WebApp.MVC.Controllers
             if (ResponsePossuiErros(response.ResponseResult)) return View(usuarioLogin);
 
             await RealizarLogin(response);
-            return RedirectToAction("Index", "Home");
+
+            if (string.IsNullOrEmpty(returnUrl)) return RedirectToAction("Index", "Home");
+
+            return LocalRedirect(returnUrl);
         }
 
 
@@ -80,7 +86,7 @@ namespace NSE.WebApp.MVC.Controllers
             var token = ObterTokenFormatado(reposta.AccessToken);
 
             var claims = new List<Claim>();
-            claims.Add(new Claim("JWT",reposta.AccessToken));
+            claims.Add(new Claim("JWT", reposta.AccessToken));
             claims.AddRange(token.Claims);
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -97,7 +103,7 @@ namespace NSE.WebApp.MVC.Controllers
         }
         private static JwtSecurityToken ObterTokenFormatado(string jwtToken)
         {
-            return  new JwtSecurityTokenHandler().ReadJwtToken(jwtToken) as JwtSecurityToken;
+            return new JwtSecurityTokenHandler().ReadJwtToken(jwtToken) as JwtSecurityToken;
         }
 
     }
