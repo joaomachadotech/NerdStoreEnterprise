@@ -11,7 +11,7 @@ namespace NSE.Catalogo.API.Configuration
     public static class ApiConfig
     {
         public static void AddApiConfiguration(this IServiceCollection services, IConfiguration configuration)
-        {
+        { //teste
             services.AddDbContext<CatalogoContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
