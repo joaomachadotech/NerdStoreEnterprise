@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using NSE.WebApp.MVC.Models;
+using Refit;
 
 namespace NSE.WebApp.MVC.Services
 {
@@ -10,5 +11,16 @@ namespace NSE.WebApp.MVC.Services
     {
         Task<IEnumerable<ProdutoViewModel>> ObterTodos();
         Task<ProdutoViewModel> ObterPorId(Guid id);
+    }
+
+    public interface ICatalogoServiceRefit
+    {
+        [Get("/catalogo/produtos/")]
+        Task<IEnumerable<ProdutoViewModel>> ObterTodos();
+
+        [Get("/catalogo/produtos/{id}")]
+        Task<ProdutoViewModel> ObterPorId(Guid id);
+
+
     }
 }

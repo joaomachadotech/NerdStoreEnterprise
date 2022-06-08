@@ -2,6 +2,8 @@
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Polly.CircuitBreaker;
+using Refit;
 
 namespace NSE.WebApp.MVC.Extensions
 {
@@ -23,20 +25,37 @@ namespace NSE.WebApp.MVC.Extensions
             }
             catch (CustomHttpResquetException e)
             {
-                HandleRequestExceptionAsync(httpContext, e);
+                HandleRequestExceptionAsync(httpContext, e.StatusCode);
+            }
+            catch (ValidationApiException e)
+            {
+                HandleRequestExceptionAsync(httpContext, e.StatusCode);
+            }
+            catch (ApiException e)
+            {
+                HandleRequestExceptionAsync(httpContext, e.StatusCode);
+            }
+            catch (BrokenCircuitException)
+            {
+                HandleCircuitBreakerExceptionAsync(httpContext);
             }
         }
 
 
         private static void HandleRequestExceptionAsync(HttpContext context,
-            CustomHttpResquetException httpResquetException)
+            HttpStatusCode statusCode)
         {
-            if (httpResquetException.StatusCode == HttpStatusCode.Unauthorized)
+            if (statusCode == HttpStatusCode.Unauthorized)
             {
                 context.Response.Redirect($"/login?ReturnUrl={context.Request.Path}");
                 return;
             }
-            context.Response.StatusCode = (int)httpResquetException.StatusCode;
+            context.Response.StatusCode = (int)statusCode;
+        }
+
+        private static void HandleCircuitBreakerExceptionAsync(HttpContext context)
+        {
+            context.Response.Redirect("/sistema-indisponivel");
         }
     }
 }
