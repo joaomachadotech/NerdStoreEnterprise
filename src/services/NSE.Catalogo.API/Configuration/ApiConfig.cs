@@ -16,9 +16,11 @@ namespace NSE.Catalogo.API.Configuration
             services.AddDbContext<CatalogoContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
+            services.AddDbContext<CatalogoContextNovo>(options =>
+                options.UseSqlServer(configuration.GetConnectionString("ServerJohn")));
             services.AddControllers();
 
-            services.AddCors(options =>
+            services.AddCors(options => 
             {
                 options.AddPolicy("Total",
                     builder =>
