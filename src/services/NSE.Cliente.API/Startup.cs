@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MediatR;
 using NSE.Clientes.API.Configuration;
 using NSE.WebAPI.Core.Identidade;
 
@@ -37,9 +38,12 @@ namespace NSE.Clientes.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddApiConfiguration(Configuration);
-            services.RegisterServices();
             services.AddJwtConfiguration(Configuration);
+
             services.AddSwaggerConfiguration();
+            services.AddMediatR(typeof(Startup));
+            services.RegisterServices();
+
         }
 
 
