@@ -11,7 +11,7 @@ namespace NSE.Catalogo.API.Configuration
         {
             services.AddScoped<IProdutoRepository, ProdutoRepository>();
             services.AddScoped<CatalogoContext>();
-            services.AddScoped<CatalogoContextNovo>();
+            services.AddScoped<TarefasContext>();
         }
 
     }

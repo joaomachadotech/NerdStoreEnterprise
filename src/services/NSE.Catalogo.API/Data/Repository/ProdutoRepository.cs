@@ -10,9 +10,9 @@ namespace NSE.Catalogo.API.Data.Repository
     public class ProdutoRepository: IProdutoRepository
     {
         private readonly CatalogoContext _context;
-        private readonly CatalogoContextNovo _catalogoContextNovo;
+        private readonly TarefasContext _catalogoContextNovo;
 
-        public ProdutoRepository(CatalogoContext context, CatalogoContextNovo catalogoContextNovo)
+        public ProdutoRepository(CatalogoContext context, TarefasContext catalogoContextNovo)
         {
             _context = context;
             _catalogoContextNovo = catalogoContextNovo;
@@ -22,10 +22,10 @@ namespace NSE.Catalogo.API.Data.Repository
         {
             return await _context.Produtos.FindAsync(id);
         }
-        public async  Task<IEnumerable<Produto>> ObterTodos()
-        {
+        public async  Task<IEnumerable<Produto>> ObterTodos() {
             var contexto =  await _context.Produtos.AsNoTracking().ToListAsync();
-            var contextoNovo = await _catalogoContextNovo.Produtos.AsNoTracking().ToArrayAsync();
+           var contextox = await _catalogoContextNovo.Tarefas.AsNoTracking().ToListAsync();
+
 
             return contexto;
 

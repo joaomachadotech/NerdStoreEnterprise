@@ -6,12 +6,12 @@ using NSE.Core.Data;
 
 namespace NSE.Catalogo.API.Data
 {
-    public class CatalogoContextNovo : DbContext, IUnitOfWork
+    public class TarefasContext : DbContext, IUnitOfWork
     {
-        public CatalogoContextNovo(DbContextOptions<CatalogoContextNovo> options)
+        public TarefasContext(DbContextOptions<TarefasContext> options)
             : base(options) { }
 
-        public DbSet<Produto> Produtos { get; set; }
+        public DbSet<Tarefas> Tarefas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -19,7 +19,7 @@ namespace NSE.Catalogo.API.Data
                          e => e.GetProperties().Where(p => p.ClrType == typeof(string))))
                 property.SetColumnType("varchar(100)");
 
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(CatalogoContextNovo).Assembly);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(TarefasContext).Assembly);
         }
 
         public async Task<bool> Commit()
